@@ -1,53 +1,78 @@
-entrypoint = "index.js"
-modules = ["python-3.11", "nodejs-20", "postgresql-16"]
-hidden = [".config", "package-lock.json"]
+hidden = [".config"]
 
-[gitHubImport]
-requiredFiles = [".replit", "replit.nix", "package.json", "package-lock.json"]
+entrypoint = "index.js"
+run = "node index.js"
 
 [nix]
-channel = "stable-24_11"
-packages = ["libuuid", "cairo", "pango", "giflib", "libjpeg", "unzip"]
+channel = "stable-22_05"
 
-[deployment]
-run = ["node", "index.js"]
-deploymentTarget = "autoscale"
-ignorePorts = false
+[env]
+XDG_CONFIG_HOME = "/home/runner/.config"
+PATH = "/home/runner/$REPL_SLUG/.config/bin:/home/runner/$REPL_SLUG/.config/npm/node_global/bin:$PATH"
+npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
 
-[workflows]
-runButton = "Project"
+[interpreter]
+command = [
+	"prybar-nodejs",
+	"-q",
+	"--ps1",
+	"\u0001\u001b[33m\u0002\u0001\u001b[00m\u0002 ",
+	"-i"
+]
 
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "Goatbot"
+[packager]
+language = "nodejs"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "GoatBot"
+  [packager.features]
+  packageSearch = true
+  guessImports = true
+  enabledForHosting = false
 
-[[workflows.workflow]]
-name = "GoatBot"
-author = "GoatBot"
+[languages.javascript]
+pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
 
-[workflows.workflow.metadata]
-outputType = "console"
+  [languages.javascript.languageServer]
+  start = [ "typescript-language-server", "--stdio" ]
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start"
+[debugger]
+support = true
 
-[[ports]]
-localPort = 3000
-externalPort = 3000
+  [debugger.interactive]
+  transport = "localhost:0"
+  startCommand = [ "dap-node" ]
 
-[[ports]]
-localPort = 3001
-externalPort = 80
+    [debugger.interactive.initializeMessage]
+    command = "initialize"
+    type = "request"
 
-[[ports]]
-localPort = 5000
-externalPort = 5000
+      [debugger.interactive.initializeMessage.arguments]
+      clientID = "replit"
+      clientName = "replit.com"
+      columnsStartAt1 = true
+      linesStartAt1 = true
+      locale = "en-us"
+      pathFormat = "path"
+      supportsInvalidatedEvent = true
+      supportsProgressReporting = true
+      supportsRunInTerminalRequest = true
+      supportsVariablePaging = true
+      supportsVariableType = true
 
-[agent]
-expertMode = true
+    [debugger.interactive.launchMessage]
+    command = "launch"
+    type = "request"
+    
+      [debugger.interactive.launchMessage.arguments]  
+      args = []
+      console = "externalTerminal"
+      cwd = "."
+      environment = []
+      pauseForSourceMap = false
+      program = "./index.js"
+      request = "launch"
+      sourceMaps = true
+      stopOnEntry = false
+      type = "pwa-node"
+
+[unitTest]
+language = "nodejs"
